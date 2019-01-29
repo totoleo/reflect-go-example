@@ -27,6 +27,16 @@ func TestTypeOf(t *testing.T) {
 	fmt.Println(reflect.TypeOf(file))
 }
 
+func TestTypeUnderlying(t *testing.T) {
+	var myIntVar MyInt = 33
+	var intVar int = 33
+	intVarType := reflect.TypeOf(intVar)
+	myIntVarType := reflect.TypeOf(myIntVar)
+	if intVarType.Kind() != myIntVarType.Kind() {
+		t.Error("expect same underlying type")
+	}
+}
+
 func TestValueOf(t *testing.T) {
 	license, _ := os.Open("./LICENSE")
 	var (
@@ -46,7 +56,7 @@ func TestValueOf(t *testing.T) {
 	fmt.Println(reflect.ValueOf(file).Elem().Type())
 }
 
-func TestTypeOfDefined(t *testing.T) {
+func TestTypeInspect(t *testing.T) {
 
 	var myIntVar MyInt = 33
 	type hello struct {
@@ -73,7 +83,7 @@ func inspect(myIntVar interface{}) {
 
 func TestSetable(t *testing.T) {
 
-	t.Run("canot set", func(t *testing.T) {
+	t.Run("cannot set", func(t *testing.T) {
 		defer func() {
 			if err := recover(); err == nil {
 				t.Error("expect panic")
