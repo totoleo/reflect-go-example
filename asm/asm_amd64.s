@@ -2,8 +2,8 @@
 
 TEXT ·makeFuncStub(SB),(NOSPLIT|WRAPPER),$24-8
 
-    MOVQ	DX, 0(SP)
-
+	MOVQ	a+0(FP), CX
+	MOVQ	CX, 0(SP)
 
 	MOVQ	b+8(FP), CX
     MOVQ	CX, 8(SP)
