@@ -1,7 +1,6 @@
 package rge
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -9,32 +8,39 @@ import (
 func TestMapAssign(t *testing.T) {
 	var (
 		srv = map[string]interface{}{
-			"a": "hello",
-			"b": "world",
-			"c": 2,
+			"a": "steve",
+			"b": "jobs",
+			"c": 0xf8ff,
 		}
-		dst = make(map[string]interface{})
+		dst = make(map[string]string)
 	)
 	srvValue := reflect.ValueOf(srv)
 	dstValue := reflect.ValueOf(dst)
 	dstType := dstValue.Type()
 	keys := srvValue.MapKeys()
 	dstElemType := dstType.Elem()
+	srcElemType := srvValue.Type().Elem()
+	shouldConvert := srcElemType != dstElemType
+	if shouldConvert {
+		t.Log("check convertible from type", srcElemType, "to type", dstElemType)
+	}
 	for _, key := range keys {
 		value := srvValue.MapIndex(key)
-		var valueType reflect.Type
-		if value.Type().Kind() == reflect.Interface {
-			valueType = value.Elem().Type()
-			value = value.Elem()
-		} else {
-			valueType = value.Type()
-		}
-		if valueType.Kind() != dstElemType.Kind() && dstElemType.Kind() != reflect.Interface {
-			t.Error(fmt.Errorf("expect type:%v but get type:%v", dstElemType.Kind(), value.Type().Kind()))
-			return
+
+		if shouldConvert {
+			if value.Kind() == reflect.Interface {
+				value = value.Elem()
+			}
+			valType := value.Type()
+			if !valType.ConvertibleTo(dstElemType) {
+				t.Errorf("val:%v type %v not convertible to type %v", value.Interface(), valType, dstElemType)
+				continue
+			}
+
+			value = value.Convert(dstElemType)
 		}
 
-		dstValue.SetMapIndex(key, value.Convert(dstElemType))
+		dstValue.SetMapIndex(key, value)
 	}
 	t.Log(dst)
 }
