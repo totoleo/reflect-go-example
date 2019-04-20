@@ -31,25 +31,48 @@ func TestMakeSlice(t *testing.T) {
 	t.Log(slice)
 }
 
-func BenchmarkMake(b *testing.B) {
+const sliceCap = 128
+
+func BenchmarkMakeReflect(b *testing.B) {
+	var values []reflect.Value
+	for i := 0; i < sliceCap; i++ {
+		values = append(values, reflect.ValueOf(strconv.FormatInt(int64(i), 10)))
+	}
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		stringType := reflect.TypeOf("")
 		stringSlice := reflect.SliceOf(stringType)
 		slice := reflect.MakeSlice(stringSlice, 0, 64)
-		for i := 0; i < 64; i++ {
-			slice = reflect.Append(slice, reflect.ValueOf(strconv.FormatInt(int64(i), 10)))
+		for _, value := range values {
+			slice = reflect.Append(slice, value)
 		}
 	}
 }
 func BenchmarkMakeNative(b *testing.B) {
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		var slice = make([]string, 0, 64)
-		for i := 0; i < 64; i++ {
-			slice = append(slice, strconv.FormatInt(int64(i), 10))
-		}
+	var values []string
+	for i := 0; i < sliceCap; i++ {
+		values = append(values, strconv.FormatInt(int64(i), 10))
 	}
+
+	b.Run("stack", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			var slice = make([]string, 0, sliceCap)
+			for _, value := range values {
+				slice = append(slice, value)
+			}
+		}
+	})
+	b.Run("heap", func(b *testing.B) {
+		b.ReportAllocs()
+		length := sliceCap
+		for i := 0; i < b.N; i++ {
+			var slice = make([]string, 0, length)
+			for _, value := range values {
+				slice = append(slice, value)
+			}
+		}
+	})
 }
 
 type _tKey struct {
