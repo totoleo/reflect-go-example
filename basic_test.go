@@ -95,6 +95,18 @@ func TestSetable(t *testing.T) {
 		varValue := reflect.ValueOf(intVar)
 		varValue.Set(reflect.ValueOf(3))
 	})
+	t.Run("cannot set", func(t *testing.T) {
+		defer func() {
+			if err := recover(); err == nil {
+				t.Error("expect panic")
+			}
+		}()
+		s := "hello world"
+		val := reflect.ValueOf(_defType{Str: s, StrRef: &s})
+		strVal := reflect.ValueOf("hello leo")
+
+		val.Field(0).Set(strVal)
+	})
 
 	t.Run("ok", func(t *testing.T) {
 		var (
@@ -106,5 +118,21 @@ func TestSetable(t *testing.T) {
 			t.Error("expect 3")
 		}
 		t.Log(intVar)
+
+		s := "hello world"
+		val := reflect.ValueOf(_defType{Str: s, StrRef: &s})
+		t.Log(val.Field(1).Elem())
+		strVal := reflect.ValueOf("hello leo")
+
+		val.Field(1).Elem().Set(strVal)
+
+		t.Log(val.Field(1).Elem())
+
+		valRef := reflect.New(val.Type())
+
+		field := valRef.Elem().Field(0)
+		field.Set(strVal)
+		//valRef.Elem().Field(1).Set(val.Field(1))
+		t.Log(valRef)
 	})
 }

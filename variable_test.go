@@ -10,6 +10,17 @@ import (
 	"time"
 )
 
+func TestMakePrimitives(t *testing.T) {
+	intType := reflect.TypeOf(int(0))
+	intVal := reflect.New(intType)
+
+	intVal.Elem().Set(reflect.ValueOf(1))
+	if intVal.Elem().Interface().(int) != 1 {
+		t.Error("expect 1")
+		return
+	}
+}
+
 func TestMakeSlice(t *testing.T) {
 	stringType := reflect.TypeOf("")
 	stringSlice := reflect.SliceOf(stringType)
@@ -150,4 +161,27 @@ func proxyMe(ctx context.Context, name string, msgs ...string) string {
 		sb.WriteByte('\n')
 	}
 	return sb.String()
+}
+
+type _defType struct {
+	Str    string
+	StrRef *string
+}
+
+func TestMakeStruct(t *testing.T) {
+	s := "hello world"
+	val := reflect.ValueOf(_defType{Str: s, StrRef: &s})
+	t.Log(val.Field(1).Elem())
+	strVal := reflect.ValueOf("hello leo")
+
+	val.Field(1).Elem().Set(strVal)
+
+	t.Log(val.Field(1).Elem())
+
+	valRef := reflect.New(val.Type())
+
+	field := valRef.Elem().Field(0)
+	field.Set(strVal)
+	//valRef.Elem().Field(1).Set(val.Field(1))
+	t.Log(valRef)
 }
