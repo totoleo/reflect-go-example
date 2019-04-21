@@ -189,6 +189,7 @@ func proxyMe(ctx context.Context, name string, msgs ...string) string {
 type _defType struct {
 	Str    string
 	StrRef *string
+	str    string
 }
 
 func TestMakeStruct(t *testing.T) {
