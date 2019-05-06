@@ -17,13 +17,13 @@ func TestMapAssign(t *testing.T) {
 	srvValue := reflect.ValueOf(srv)
 	dstValue := reflect.ValueOf(dst)
 	dstType := dstValue.Type()
-	keys := srvValue.MapKeys()
 	dstElemType := dstType.Elem()
 	srcElemType := srvValue.Type().Elem()
 	shouldConvert := srcElemType != dstElemType
 	if shouldConvert {
 		t.Log("check convertible from type", srcElemType, "to type", dstElemType)
 	}
+	keys := srvValue.MapKeys()
 	for _, key := range keys {
 		value := srvValue.MapIndex(key)
 
